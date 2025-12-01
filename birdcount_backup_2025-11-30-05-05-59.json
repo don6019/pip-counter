@@ -1,0 +1,96 @@
+{
+  "settings": {
+    "observer": "Don",
+    "station": "B",
+    "species": "PIP",
+    "sessionStart": "2025-11-30T10:00",
+    "sessionLength": 15,
+    "segmentLength": 5,
+    "segments": [
+      {
+        "start": "2025-11-30T00:00:00.000Z",
+        "end": "2025-11-30T00:05:00.000Z"
+      },
+      {
+        "start": "2025-11-30T00:05:00.000Z",
+        "end": "2025-11-30T00:10:00.000Z"
+      },
+      {
+        "start": "2025-11-30T00:10:00.000Z",
+        "end": "2025-11-30T00:15:00.000Z"
+      }
+    ]
+  },
+  "records": [
+    {
+      "id": 1764461147729,
+      "when": "2025-11-30T00:05:46.880Z",
+      "segmentIndex": 1,
+      "segmentLabel": "10:05:00 → 10:10:00",
+      "observer": "Don",
+      "station": "B",
+      "species": "PIP",
+      "count": 14
+    },
+    {
+      "id": 1764461141286,
+      "when": "2025-11-30T00:05:40.560Z",
+      "segmentIndex": 1,
+      "segmentLabel": "10:05:00 → 10:10:00",
+      "observer": "Don",
+      "station": "B",
+      "species": "PIP",
+      "count": 10
+    },
+    {
+      "id": 1764461096405,
+      "when": "2025-11-30T00:04:55.880Z",
+      "segmentIndex": 0,
+      "segmentLabel": "10:00:00 → 10:05:00",
+      "observer": "Don",
+      "station": "B",
+      "species": "PIP",
+      "count": 7
+    },
+    {
+      "id": 1764460929466,
+      "when": "2025-11-30T00:02:08.658Z",
+      "segmentIndex": 0,
+      "segmentLabel": "10:00:00 → 10:05:00",
+      "observer": "Don",
+      "station": "B",
+      "species": "PIP",
+      "count": 6
+    },
+    {
+      "id": 1764460924316,
+      "when": "2025-11-30T00:02:04.026Z",
+      "segmentIndex": 0,
+      "segmentLabel": "10:00:00 → 10:05:00",
+      "observer": "Don",
+      "station": "B",
+      "species": "PIP",
+      "count": 5
+    },
+    {
+      "id": 1764460922979,
+      "when": "2025-11-30T00:02:02.032Z",
+      "segmentIndex": 0,
+      "segmentLabel": "10:00:00 → 10:05:00",
+      "observer": "Don",
+      "station": "B",
+      "species": "PIP",
+      "count": 2
+    },
+    {
+      "id": 1764460919715,
+      "when": "2025-11-30T00:01:58.817Z",
+      "segmentIndex": 0,
+      "segmentLabel": "10:00:00 → 10:05:00",
+      "observer": "Don",
+      "station": "B",
+      "species": "PIP",
+      "count": 1
+    }
+  ]
+}

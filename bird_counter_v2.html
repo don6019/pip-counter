@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bird Counter v2</title>
+<style>
+body { font-family: Arial; padding: 10px; }
+button { padding: 20px; font-size: 20px; margin: 5px; }
+.bigbtn { width: 90px; }
+.counter-area { margin-top: 15px; font-size: 24px; }
+</style>
+</head>
+<body>
+
+<h2>Bird Counter v2</h2>
+
+<label>Observer:</label><input id="observer"><br>
+<label>Station:</label><input id="station"><br><br>
+
+<div class="counter-area">
+    Segment subtotal: <span id="segTotal">0</span><br>
+    Session total: <span id="sessTotal">0</span>
+</div>
+
+<div>
+    <button class="bigbtn" onclick="addCount(1)">+1</button>
+    <button class="bigbtn" onclick="addCount(2)">+2</button>
+    <button class="bigbtn" onclick="addCount(5)">+5</button>
+    <button class="bigbtn" onclick="addCount(7)">+7</button>
+    <button class="bigbtn" onclick="addCount(10)">+10</button>
+    <button class="bigbtn" onclick="addCount(15)">+15</button>
+</div>
+
+<div>
+    <button class="bigbtn" onclick="addCount(-1)">-1</button>
+</div>
+
+<br>
+
+<button onclick="saveRecord()" style="background:#4CAF50;color:white;">ADD record</button>
+<button onclick="newSegment()" style="background:#2196F3;color:white;">Next segment</button>
+<button onclick="exportCSV()" style="background:#FF5722;color:white;">Export CSV</button>
+
+<script>
+let segmentTotal = 0;
+let sessionTotal = 0;
+let records = [];
+
+function addCount(n){
+    segmentTotal += n;
+    if (segmentTotal < 0) segmentTotal = 0;
+    document.getElementById("segTotal").innerText = segmentTotal;
+}
+
+function saveRecord(){
+    let obs = document.getElementById("observer").value;
+    let st = document.getElementById("station").value;
+    let now = new Date().toISOString();
+    sessionTotal += segmentTotal;
+
+    records.push({ observer: obs, station: st, time: now, count: segmentTotal });
+
+    document.getElementById("sessTotal").innerText = sessionTotal;
+    segmentTotal = 0;
+    document.getElementById("segTotal").innerText = 0;
+
+    alert("Record saved.");
+}
+
+function newSegment(){
+    segmentTotal = 0;
+    document.getElementById("segTotal").innerText = 0;
+}
+
+function exportCSV(){
+    let csv = "observer,station,time,count\n";
+    records.forEach(r=>{
+        csv += `${r.observer},${r.station},${r.time},${r.count}\n`;
+    });
+    let blob = new Blob([csv], {type: "text/csv"});
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement("a");
+    a.href = url;
+    a.download = "bird_counts.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+}
+</script>
+
+</body>
+</html>

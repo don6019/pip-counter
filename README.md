@@ -1,1 +1,1 @@
-pips-counter
+Counter for PIP surveys

@@ -667,7 +667,7 @@
         return;
       }
       const latestRelease = await response.json();
-      const latestVersion = latestRelease.tag_name.replace('V', '');
+      const latestVersion = latestRelease.tag_name.replace(/^v/i, '');
 
       if (parseFloat(latestVersion) > parseFloat(currentVersion)) {
         const message = `A new version (${latestVersion}) is available. You are using ${currentVersion}.`;

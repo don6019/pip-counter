@@ -2,7 +2,7 @@ const CACHE_NAME = 'pip-counter-cache-v1';
 const urlsToCache = [
   'index.html',
   'manifest.json',
-  'icon.svg'
+  'icon-512.png'
 ];
 
 self.addEventListener('install', event => {

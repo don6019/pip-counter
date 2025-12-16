@@ -572,6 +572,12 @@
     if (Number(currentCount) === 0) {
       return; // Silently ignore if count is 0
     }
+
+    // Haptic feedback on successful press
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
+
     const selectedSegmentIndex = Number(segmentSelect.value);
     const seg = segments[selectedSegmentIndex];
 
@@ -948,6 +954,15 @@
     .forEach(el=>el.addEventListener('change',saveSettings));
 
   (function init(){
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('portrait').catch(function(error) {
+          console.log("Orientation lock failed:", error);
+        });
+      }
+    } catch (err) {
+      console.error('Error attempting to lock orientation:', err);
+    }
     const now=new Date();
     now.setSeconds(0,0);
     now.setMinutes(Math.floor(now.getMinutes()/5)*5);

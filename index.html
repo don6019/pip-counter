@@ -773,6 +773,15 @@
   }
 
   btnBuild.onclick=()=>{
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('portrait').catch(function(error) {
+          console.log("Orientation lock failed:", error);
+        });
+      }
+    } catch (err) {
+      console.error('Error attempting to lock orientation:', err);
+    }
     buildSegmentsFromInputs();
     if(!segments.length){ alert("No segments created."); return; }
     buildSegmentSelect();
@@ -954,15 +963,6 @@
     .forEach(el=>el.addEventListener('change',saveSettings));
 
   (function init(){
-    try {
-      if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('portrait').catch(function(error) {
-          console.log("Orientation lock failed:", error);
-        });
-      }
-    } catch (err) {
-      console.error('Error attempting to lock orientation:', err);
-    }
     const now=new Date();
     now.setSeconds(0,0);
     now.setMinutes(Math.floor(now.getMinutes()/5)*5);

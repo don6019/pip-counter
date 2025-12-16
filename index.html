@@ -54,9 +54,10 @@
   .actions button{margin-right:6px}
 
   @media (max-width:520px){
-    .counter-display{font-size:34px}
-    .bigbtn{font-size:18px;padding:10px}
-    .addbtn{font-size:18px;padding:10px}
+    .counter-display{font-size:40px}
+    .bigbtn{font-size:22px;padding:10px;aspect-ratio:1}
+    .bigbtn.minus, .bigbtn.plus {aspect-ratio: 2 / 1}
+    .addbtn{font-size:22px;padding:27px 10px}
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -117,7 +118,7 @@
 <div class="wrap">
   <header>
     <h1>PIP Counter — V1.1</h1>
-    <div style="font-size:12px;color:var(--muted)">Prototype — offline-friendly - data stored locally in this browser</div>
+    <div style="font-size:12px;color:var(--muted)">Data stored locally</div>
   </header>
 
   <!-- Setup card -->
@@ -203,9 +204,9 @@
       <button class="addbtn" id="btnAdd">ADD</button>
 
       <div class="meta">
-        <div class="pill">Segment subtotal: <strong id="segSubtotal">0</strong></div>
-        <div class="pill">Session total: <strong id="sessTotal">0</strong></div>
-        <div class="pill">Saved records: <strong id="recordCount">0</strong></div>
+        <div class="pill">Subtotal: <strong id="segSubtotal">0</strong></div>
+        <div class="pill">Total: <strong id="sessTotal">0</strong></div>
+        <div class="pill">Records: <strong id="recordCount">0</strong></div>
       </div>
 
       <div class="controls" style="margin-top:12px">
@@ -230,7 +231,7 @@
   </div>
 
   <footer style="font-size:13px;color:var(--muted);text-align:center;margin-top:8px">
-    Prototype — designed by Don Cameron don6019@gmail.com Implemented with assistance from ChatGPT & Gemini.
+    by Don Cameron with help from ChatGPT & Gemini. don6019@gmail.com
   </footer>
 </div>
 

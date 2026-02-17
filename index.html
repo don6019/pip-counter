@@ -2,22 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="/pip-counter/manifest.json">
-    <link rel="icon" sizes="192x192" href="/pip-counter/icon-192.png">
-    <link rel="icon" sizes="512x512" href="/pip-counter/icon-512.png">
-    <title>Pip Counter</title>
+    <link rel="icon" type="image/png" sizes="192x192" href="/pip-counter/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/pip-counter/icon-512.png">
+    <title>PIP Counter</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        #counter {
+            font-size: 48px;
+            margin: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to Pip Counter!</h1>
+    <h1>PIP Counter Application</h1>
+    <div id="counter">0</div>
+    <button id="increment-btn">Increment</button>
     <script>
+        let count = 0;
+        const counterDiv = document.getElementById('counter');
+        const incrementButton = document.getElementById('increment-btn');
+        
+        incrementButton.addEventListener('click', () => {
+            count++;
+            counterDiv.textContent = count;
+        });
+        
+        // Service Worker registration
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/pip-counter/service-worker.js').then(function(registration) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/pip-counter/service-worker.js')
+                .then((registration) => {
                     console.log('Service Worker registered with scope:', registration.scope);
-                }).catch(function(error) {
-                    console.error('Service Worker registration failed:', error);
                 });
             });
         }

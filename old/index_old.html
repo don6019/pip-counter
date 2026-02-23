@@ -1,0 +1,969 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>PIP Counter — V1.1</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root{
+    --bg:#f6f8fb; --card:#fff; --accent:#0b76ef; --muted:#6b7280;
+    --big:48px; --gap:10px;
+  }
+  html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;background:var(--bg);color:#111}
+  .wrap{max-width:920px;margin:0 auto;padding:14px;}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+  h1{font-size:18px;margin:0}
+  .card{background:var(--card);border-radius:12px;box-shadow:0 6px 18px rgba(12,16,24,0.06);padding:12px;margin-bottom:12px}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+  input[type="text"],input[type="number"],select,input[type="datetime-local"]{padding:10px;border-radius:8px;border:1px solid #e6e8eb;font-size:15px;width:100%}
+  .row{display:flex;gap:10px;align-items:center}
+  .two{display:flex;gap:10px}
+  .two > *{flex:1}
+  .quick{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .bigbtn{flex:1;min-width:80px;padding:12px;border-radius:10px;border:none;font-size:20px;cursor:pointer;background:#eef6ff}
+  .bigbtn:active{transform:translateY(1px)}
+  .plus{background:linear-gradient(180deg,var(--accent),#0560c6);color:white}
+  .minus{background:#ef4444;color:white}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+  /* NEW: Big ADD button */
+  .addbtn {
+    width:100%;
+    padding:12px;
+    font-size:20px;
+    font-weight:700;
+    border:none;
+    border-radius:12px;
+    background:#1aef0b;
+    margin-top: 8px;
+    color:white;
+  }
+  .addbtn:active {
+    background:#095fcc;
+  }
+
+  .small{padding:10px;border-radius:8px;border:1px solid #e6e8eb;background:white;cursor:pointer}
+  .counter-display{font-size:44px;font-weight:700;text-align:center;margin-top:8px}
+  .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .pill{background:#f1f5f9;padding:8px 10px;border-radius:999px;font-size:20px;color:#111}
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+  th,td{padding:8px;border-bottom:1px solid #f1f5f9;font-size:13px;text-align:left}
+  .actions button{margin-right:6px}
+
+  @media (max-width:520px){
+    .counter-display{font-size:34px}
+    .bigbtn{font-size:18px;padding:10px}
+    .addbtn{font-size:18px;padding:10px}
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a1a;
+      --card: #2a2a2a;
+      --muted: #9e9e9e;
+    }
+    html, body {
+      color: #f5f5f5;
+    }
+    .card {
+      box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+    }
+    input[type="text"], input[type="number"], select, input[type="datetime-local"] {
+      background-color: #3c3c3c;
+      color: #f5f5f5;
+      border-color: #555;
+    }
+    .bigbtn {
+      background: #3c3c3c;
+      color: #f5f5f5;
+    }
+    .small {
+      background: #3c3c3c;
+      border-color: #555;
+    }
+    .pill {
+      background: #3c3c3c;
+      color: #f5f5f5;
+    }
+    th, td {
+      border-bottom-color: #444;
+    }
+    #btnBuild {
+      background-color: #2a4c32 !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>PIP Counter — V1.1</h1>
+    <div style="font-size:12px;color:var(--muted)">Prototype — offline-friendly - data stored locally in this browser</div>
+  </header>
+
+  <!-- Setup card -->
+  <div class="card" id="setupCard">
+    <div class="two">
+      <div>
+        <label>Observer</label>
+        <input id="observer" type="text" placeholder="Your name (optional)">
+      </div>
+      <div>
+        <label>Station</label>
+        <input id="station" type="text" placeholder="Station A / B / C">
+      </div>
+    </div>
+
+    <div style="margin-top:10px" class="two">
+      <div>
+        <label>Species</label>
+        <input id="species" type="text" value="PIP">
+      </div>
+      <div>
+        <label>Session start (local)</label>
+        <input id="sessionStart" type="datetime-local">
+      </div>
+    </div>
+
+    <div style="margin-top:10px" class="two">
+      <div>
+        <label>Session length (minutes)</label>
+        <input id="sessionLength" type="number" value="120" min="15" step="15">
+      </div>
+      <div>
+        <label>Segment length (minutes)</label>
+        <input id="segmentLength" type="number" value="15" min="5" step="5">
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="small" id="btnBuild" style="background-color: #d4edda;">Build Segments & Start</button>
+      <button class="small" id="btnResume">Resume Saved</button>
+      <button class="small" id="btnRestore">Restore from Backup</button>
+      <button class="small" id="btnClear">Clear Saved</button>
+      <button class="small" id="btnHelp">Help</button>
+    </div>
+
+    <div style="margin-top:8px;color:var(--muted);font-size:13px">
+      Tip: Set session start to the scheduled start. The app will create segments (e.g. 8 × 15 min for 120 min).
+    </div>
+  </div>
+
+  <!-- Counter card -->
+  <div class="card" id="counterCard" style="display:none">
+    <div class="row">
+      <div style="flex:1">
+        <label>Segment</label>
+        <select id="segmentSelect"></select>
+      </div>
+      <div style="width:140px">
+        <label>Segment timer</label>
+        <div class="pill" id="segTimer">--:--</div>
+      </div>
+    </div>
+
+    <div style="margin-top:10px">
+      <label>Counting for: <strong id="speciesLabel">Target species</strong>&nbsp;&nbsp;&nbsp;&nbsp;At Station: <strong id="stationLabel">station</strong></label>
+      <div class="counter-display" id="currentCount">0</div>
+
+      <div class="quick" id="quickButtons">
+        <button class="bigbtn" data-add="1">+1</button>
+        <button class="bigbtn" data-add="2">+2</button>
+        <button class="bigbtn" data-add="5">+5</button>
+        <button class="bigbtn" data-add="7">+7</button>
+        <button class="bigbtn" data-add="10">+10</button>
+        <button class="bigbtn" data-add="15">+15</button>
+      </div>
+
+      <div class="quick" style="margin-top:8px">
+        <button class="bigbtn minus" id="btnMinus">−1</button>
+        <button class="bigbtn plus" id="btnPlus">+1</button>
+      </div>
+
+      <!-- Modified ADD button -->
+      <button class="addbtn" id="btnAdd">ADD</button>
+
+      <div class="meta">
+        <div class="pill">Segment subtotal: <strong id="segSubtotal">0</strong></div>
+        <div class="pill">Session total: <strong id="sessTotal">0</strong></div>
+        <div class="pill">Saved records: <strong id="recordCount">0</strong></div>
+      </div>
+
+      <div class="controls" style="margin-top:12px">
+        <button class="small" id="btnResetCount">Reset count</button>
+        
+        <button class="small" id="btnExportReport">Export Report</button>
+        <button class="small" id="btnExtraData" style="display:none; background-color: #f0ead6;">Extra Data</button>
+      </div>
+
+      
+
+      <div style="margin-top:12px">
+        <label>Recorded rows (most recent first)</label>
+        <div style="max-height:260px;overflow:auto">
+          <table id="recordsTable">
+            <thead><tr><th>Time</th><th>Segment</th><th>Count</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer style="font-size:13px;color:var(--muted);text-align:center;margin-top:8px">
+    Prototype — designed by Don Cameron don6019@gmail.com Implemented with assistance from ChatGPT & Gemini.
+  </footer>
+</div>
+
+<input type="file" id="restoreInput" style="display:none" accept=".json">
+
+<script>
+(function(){
+  // Elements
+  const setupCard = document.getElementById('setupCard');
+  const counterCard = document.getElementById('counterCard');
+  const observerEl = document.getElementById('observer');
+  const stationEl = document.getElementById('station');
+  const speciesEl = document.getElementById('species');
+  const speciesLabel = document.getElementById('speciesLabel');
+  const stationLabel = document.getElementById('stationLabel');
+  const sessionStartEl = document.getElementById('sessionStart');
+  const sessionLengthEl = document.getElementById('sessionLength');
+  const segmentLengthEl = document.getElementById('segmentLength');
+  const btnBuild = document.getElementById('btnBuild');
+  const btnResume = document.getElementById('btnResume');
+  const btnRestore = document.getElementById('btnRestore');
+  const btnClear = document.getElementById('btnClear');
+  const btnHelp = document.getElementById('btnHelp');
+  const btnExtraData = document.getElementById('btnExtraData');
+
+  const segmentSelect = document.getElementById('segmentSelect');
+  const segTimer = document.getElementById('segTimer');
+  const currentCountEl = document.getElementById('currentCount');
+  const quickButtons = document.getElementById('quickButtons');
+  const btnMinus = document.getElementById('btnMinus');
+  const btnPlus = document.getElementById('btnPlus');
+  const btnAdd = document.getElementById('btnAdd');
+  const btnResetCount = document.getElementById('btnResetCount');
+
+  const segSubtotalEl = document.getElementById('segSubtotal');
+  const sessTotalEl = document.getElementById('sessTotal');
+  const recordCountEl = document.getElementById('recordCount');
+  const recordsTbody = document.querySelector('#recordsTable tbody');
+  const restoreInput = document.getElementById('restoreInput');
+
+  // State
+  let segments = [];
+  let segmentIndex = 0;
+  let timerInterval = null;
+  let autoRecord = true;
+  let currentCount = 0;
+  let records = [];
+  let settingsKey = 'bc_settings_v1';
+  let recordsKey = 'bc_records_v1';
+  let extraDataMode = false;
+  let beepPlayedForSegment = [];
+  let audioCtx;
+
+  function saveSettings(){
+    const s = {
+      observer: observerEl.value,
+      station: stationEl.value,
+      species: speciesEl.value,
+      sessionStart: sessionStartEl.value,
+      sessionLength: Number(sessionLengthEl.value),
+      segmentLength: Number(segmentLengthEl.value),
+      segments: segments.map(s => ({start:s.start.toISOString(), end:s.end.toISOString()}))
+    };
+    localStorage.setItem(settingsKey, JSON.stringify(s));
+  }
+
+  function saveRecords(){
+    localStorage.setItem(recordsKey, JSON.stringify(records));
+  }
+
+  function loadSaved(){
+    const s = localStorage.getItem(settingsKey);
+    const r = localStorage.getItem(recordsKey);
+    if(s){
+      try{
+        const parsed = JSON.parse(s);
+        observerEl.value = parsed.observer||'';
+        stationEl.value = parsed.station||'';
+        speciesEl.value = parsed.species||'Target species';
+        speciesLabel.textContent = speciesEl.value||'Target species';
+        stationLabel.textContent = stationEl.value || 'N/A';
+        sessionStartEl.value = parsed.sessionStart || sessionStartEl.value;
+        sessionLengthEl.value = parsed.sessionLength || sessionLengthEl.value;
+        segmentLengthEl.value = parsed.segmentLength || segmentLengthEl.value;
+        if(parsed.segments){
+          segments = parsed.segments.map(x=>({start:new Date(x.start), end:new Date(x.end)}));
+          buildSegmentSelect();
+          beepPlayedForSegment = new Array(segments.length).fill(false);
+          checkSessionEnd();
+          showCounter();
+        }
+      }catch(e){}
+    }
+    if(r){
+      try{records=JSON.parse(r);}catch(e){records=[];}
+    }
+    renderRecords();
+    updateTotals();
+  }
+
+  function clearSaved(){
+    if (confirm('Would you like to back up the current session data before clearing it?')) {
+      backupDataAsJSON();
+    }
+
+    if (confirm('Are you sure you want to clear ALL saved data? This cannot be undone.')) {
+      localStorage.removeItem(settingsKey);
+      localStorage.removeItem(recordsKey);
+      records = [];
+      segments = [];
+      stopTimer();
+      hideCounter();
+      renderRecords();
+      updateTotals();
+      alert('Session data has been cleared.');
+    }
+  }
+
+  function backupDataAsJSON() {
+    const settings = localStorage.getItem(settingsKey);
+    const recordsData = localStorage.getItem(recordsKey);
+
+    if (!settings && !recordsData) { return; }
+
+    const backupData = { settings: settings ? JSON.parse(settings) : {}, records: recordsData ? JSON.parse(recordsData) : [] };
+    const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `birdcount_backup_${new Date().toISOString().slice(0, 19).replace(/[:T]/g,'-')}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function restoreFromFile(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const content = e.target.result;
+        const backupData = JSON.parse(content);
+
+        if (backupData && backupData.settings && Array.isArray(backupData.records)) {
+          if (!confirm('This will overwrite your current session. Are you sure you want to restore from this backup?')) {
+            restoreInput.value = ''; // Clear input
+            return;
+          }
+
+          localStorage.setItem(settingsKey, JSON.stringify(backupData.settings));
+          localStorage.setItem(recordsKey, JSON.stringify(backupData.records));
+
+          loadSaved(); // Reload the app state
+          alert('Session successfully restored from backup.');
+        } else {
+          alert('Invalid backup file format.');
+        }
+      } catch (error) {
+        console.error('Error restoring from backup:', error);
+        alert('Failed to read or parse the backup file.');
+      } finally {
+        restoreInput.value = ''; // Clear input
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function buildSegmentsFromInputs(){
+    const startVal = sessionStartEl.value;
+    const sesLen = Number(sessionLengthEl.value);
+    const segLen = Number(segmentLengthEl.value);
+    const start = startVal ? new Date(startVal) : new Date();
+    segments = [];
+    let cur = new Date(start);
+    const end = new Date(cur.getTime() + sesLen*60000);
+    while(cur < end){
+      const segEnd = new Date(cur.getTime() + segLen*60000);
+      segments.push({start:new Date(cur), end:segEnd});
+      cur = segEnd;
+    }
+    beepPlayedForSegment = new Array(segments.length).fill(false);
+  }
+
+  function buildSegmentSelect(){
+    segmentSelect.innerHTML = '';
+    segments.forEach((s,i)=>{
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.text = `${s.start.toLocaleString()} → ${s.end.toLocaleTimeString()}`;
+      segmentSelect.appendChild(opt);
+    });
+    segmentIndex = 0;
+    segmentSelect.value = 0;
+    updateSegmentUI();
+  }
+
+  function updateSegmentUI(){
+    if(!segments.length){
+      segTimer.textContent='--:--';
+      return;
+    }
+    speciesLabel.textContent = speciesEl.value || 'Target species';
+    stationLabel.textContent = stationEl.value || 'N/A';
+    beepPlayedForSegment[segmentIndex] = 0; // Reset beep state for the current segment
+    updateSegTimer();
+    renderSegSubtotal();
+  }
+
+  function updateSegTimer(){
+    if(!segments.length){ segTimer.textContent='--:--'; return; }
+    stopTimer();
+    timerInterval = setInterval(()=>{
+      const now = new Date();
+      if (extraDataMode) {
+        segTimer.classList.remove('final-seconds');
+        stopTimer();
+        return;
+      }
+
+      const seg = segments[segmentIndex];
+      const firstSegment = segments[0];
+
+      // Pre-session countdown
+      if (now < firstSegment.start) {
+        const msToStart = firstSegment.start - now;
+        segTimer.textContent = `-${formatTimeLeft(msToStart)}`;
+        segTimer.style.color = 'red';
+
+        // Pre-session beeps for the last 5 seconds
+        if (msToStart > 0 && msToStart <= 5200) {
+            const secondsToStart = Math.ceil(msToStart / 1000);
+            if (secondsToStart > 0 && secondsToStart <= 5 && beepPlayedForSegment[0] < (6 - secondsToStart)) {
+                playBeep(0.2);
+                beepPlayedForSegment[0]++;
+            }
+        }
+      } else { // In-session timer
+        segTimer.style.color = 'green';
+        const msLeft = seg.end - now;
+        segTimer.textContent = formatTimeLeft(msLeft);
+
+        // Beep warnings at -3, -2, -1 seconds
+        segTimer.classList.toggle('final-seconds', msLeft <= 3000 && msLeft > 0);
+        if (msLeft > 0 && msLeft < 3200) {
+          const secondsLeft = Math.ceil(msLeft / 1000);
+          if (secondsLeft === 3 && beepPlayedForSegment[segmentIndex] < 1) {
+            playBeep(0.2); beepPlayedForSegment[segmentIndex] = 1;
+          } else if (secondsLeft === 2 && beepPlayedForSegment[segmentIndex] < 2) {
+            playBeep(0.2); beepPlayedForSegment[segmentIndex] = 2;
+          } else if (secondsLeft === 1 && beepPlayedForSegment[segmentIndex] < 3) {
+            playBeep(0.5); beepPlayedForSegment[segmentIndex] = 3;
+          }
+        }
+
+        if(msLeft <= 0){
+          beepPlayedForSegment[segmentIndex] = 0; // Reset for next potential run
+          if(autoRecord) autoRecordAndAdvance();
+          else if(segmentIndex < segments.length-1){
+            segmentIndex++;
+            segmentSelect.value = segmentIndex;
+            beepPlayedForSegment[segmentIndex] = 0;
+            updateSegmentUI();
+          }else{
+            stopTimer();
+            btnExtraData.style.display = 'inline-block';
+          }
+        }
+      }
+    },400);
+  }
+
+  function checkSessionEnd() {
+    if (segments.length > 0) {
+      const lastSegment = segments[segments.length - 1];
+      const now = new Date();
+      if (now > lastSegment.end) {
+        btnExtraData.style.display = 'inline-block';
+      }
+      else {btnExtraData.style.display = 'none'}; // hide after clicking)
+    }
+  }
+
+  function stopTimer(){
+    if(timerInterval) clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  function playBeep(duration = 0.2) {
+    if (!audioCtx) { return; }
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
+    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + duration);
+  }
+
+  function formatTimeLeft(ms){
+    if(ms < 0) ms = 0;
+    const s = Math.floor(ms/1000);
+    const m = Math.floor(s/60);
+    const sec = s % 60;
+    return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  }
+
+  function showCounter(){
+    setupCard.style.display='none';
+    counterCard.style.display='block';
+    updateSegmentUI();
+    updateSegTimer();
+    saveSettings();
+  }
+
+  function hideCounter(){
+    counterCard.style.display='none';
+    setupCard.style.display='block';
+  }
+
+  function addToCurrent(n){
+    currentCount += n;
+    if(currentCount < 0) currentCount = 0;
+    currentCountEl.textContent = currentCount;
+  }
+
+  // ---------------------------
+  // UPDATED: No popups here
+  // ---------------------------
+  function addRecord(){
+    if(!segments.length){
+      alert("No session/segments defined.");
+      return;
+    }
+
+    if (Number(currentCount) === 0) {
+      return; // Silently ignore if count is 0
+    }
+    const selectedSegmentIndex = Number(segmentSelect.value);
+    const seg = segments[selectedSegmentIndex];
+
+    const now = new Date();
+    if (!extraDataMode && now < seg.start) {
+      alert("You can't add a count until the segment has started.");
+      return;
+    }
+
+    const record = {
+      id: Date.now() + Math.floor(Math.random()*1000),
+      when: new Date().toISOString(),
+      segmentIndex: selectedSegmentIndex,
+      segmentLabel: `${seg.start.toLocaleTimeString()} → ${seg.end.toLocaleTimeString()}`,
+      observer: observerEl.value,
+      station: stationEl.value,
+      species: speciesEl.value,
+      count: Number(currentCount)
+    };
+
+    // SAVE IMMEDIATELY, NO CONFIRMATION POPUPS
+    records.unshift(record);
+    saveRecords();
+    saveSettings();
+    renderRecords();
+    updateTotals();
+
+    currentCount = 0;
+    currentCountEl.textContent = '0';
+  }
+
+  function renderRecords(){
+    recordsTbody.innerHTML='';
+    records.forEach(r=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${new Date(r.when).toLocaleTimeString()}</td>
+        <td>${escapeHtml(r.segmentLabel)}</td>
+        <td>${r.count}</td>
+        <td class="actions">
+          <button data-id="${r.id}" class="btn-delete">Delete</button>
+        </td>`;
+      recordsTbody.appendChild(tr);
+    });
+    recordCountEl.textContent = records.length;
+    renderSegSubtotal();
+  }
+
+  recordsTbody.addEventListener('click',e=>{
+    if(e.target.matches('.btn-delete')){
+      const id = Number(e.target.dataset.id);
+      if(!confirm('Delete this record?')) return;
+      records = records.filter(r=>r.id!==id);
+      saveRecords();
+      renderRecords();
+      updateTotals();
+    }
+  });
+
+  function renderSegSubtotal(){
+    const segIdx = Number(segmentSelect.value);
+    const sum = records.filter(r=>r.segmentIndex===segIdx)
+                       .reduce((a,b)=>a+b.count,0);
+    segSubtotalEl.textContent = sum;
+  }
+
+  function updateTotals(){
+    const total = records.reduce((a,b)=>a+b.count,0);
+    sessTotalEl.textContent = total;
+    renderSegSubtotal();
+  }
+
+  function autoRecordAndAdvance(){
+    if(currentCount !== 0){
+      const seg = segments[segmentIndex];
+      records.unshift({
+        id: Date.now()+Math.floor(Math.random()*1000),
+        when: new Date().toISOString(),
+        segmentIndex,
+        segmentLabel:`${seg.start.toLocaleTimeString()} → ${seg.end.toLocaleTimeString()}`,
+        observer: observerEl.value,
+        station: stationEl.value,
+        species: speciesEl.value,
+        count: currentCount
+      });
+      saveRecords();
+    }
+    currentCount=0;
+    currentCountEl.textContent='0';
+
+    if(segmentIndex<segments.length-1){
+      segmentIndex++;
+      segmentSelect.value=segmentIndex;
+      updateSegmentUI();
+      saveSettings();
+      updateTotals();
+    } else {
+      stopTimer();
+      updateTotals();
+      saveSettings();
+      // Session ended, show extra data button
+      btnExtraData.style.display = 'inline-block';
+    }
+  }
+
+  function exportCSV(){
+    if(!records.length){ alert("No records to export"); return; }
+    const header=['Time','Segment','Count'];
+    const rows = records.map(r=>
+      [
+        new Date(r.when).toLocaleTimeString(),
+        r.segmentLabel,
+        r.count
+      ]
+      .map(x=>String(x).replace(/,/g,' '))
+      .join(',')
+    );
+    const csv=[header.join(',')].concat(rows).join('\n');
+    const blob=new Blob([csv],{type:'text/csv'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download='birdcounts.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function escapeHtml(s){
+    return String(s||'').replace(/&/g,'&amp;')
+                        .replace(/</g,'&lt;')
+                        .replace(/>/g,'&gt;');
+  }
+
+  const currentVersion = document.querySelector('h1').textContent.split('V')[1].trim();
+  const repo = 'don6019/pip-counter'; // Assumes this is the repo, from user's email and project folder.
+
+  async function checkVersion() {
+    if (!navigator.onLine) {
+        console.log("Offline, skipping version check.");
+        return;
+    }
+    try {
+      const response = await fetch(`https://api.github.com/repos/${repo}/releases/latest`);
+      if (!response.ok) {
+        if (response.status === 404) {
+             console.warn(`Version check failed: No releases found for repo '${repo}' or repo is private. Please create a public release on GitHub.`);
+        } else {
+             console.error('Could not check for new version.', response.statusText);
+        }
+        return;
+      }
+      const latestRelease = await response.json();
+      const latestVersion = latestRelease.tag_name.replace(/^v/i, '');
+
+      if (parseFloat(latestVersion) > parseFloat(currentVersion)) {
+        const message = `A new version (${latestVersion}) is available. You are using ${currentVersion}.`;
+        const banner = document.createElement('div');
+        banner.id = 'update-banner';
+        banner.innerHTML = `
+          <style>
+            #update-banner {
+              padding: 12px;
+              background-color: #fffbe6;
+              border-bottom: 1px solid #ffe58f;
+              text-align: center;
+              font-size: 14px;
+              position: relative;
+            }
+            #update-banner a {
+              font-weight: bold;
+              color: var(--accent);
+            }
+            #update-banner .close-btn {
+              background: none;
+              border: none;
+              font-size: 16px;
+              cursor: pointer;
+              position: absolute;
+              top: 50%;
+              right: 15px;
+              transform: translateY(-50%);
+              color: #888;
+            }
+          </style>
+          <span>${message} <a href="${latestRelease.html_url}" target="_blank" rel="noopener noreferrer">View on GitHub</a></span>
+          <button class="close-btn" onclick="this.parentElement.style.display='none'">&times;</button>
+        `;
+        document.body.insertBefore(banner, document.body.firstChild);
+      }
+    } catch (error) {
+      console.error('Error checking for new version:', error);
+    }
+  }
+
+  btnBuild.onclick=()=>{
+    buildSegmentsFromInputs();
+    if(!segments.length){ alert("No segments created."); return; }
+    buildSegmentSelect();
+    if (!audioCtx) {
+      // Initialize AudioContext on user interaction
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    checkSessionEnd();
+    showCounter();
+    saveSettings();
+  };
+
+  btnResume.onclick=loadSaved;
+
+  btnRestore.onclick = () => {
+    restoreInput.click();
+  };
+
+  restoreInput.onchange = (event) => {
+    const file = event.target.files[0];
+    if (file) { restoreFromFile(file); }
+  };
+
+  btnClear.onclick=clearSaved;
+
+  btnHelp.onclick=()=>alert(
+`How to use:
+1) Enter observer/station/species.
+2) Set session start, session length and segment length.
+3) Click "Build Segments & Start".
+4) Tap quick buttons or +/− to count.
+5) Tap ADD to save each record.
+6) Export Report when finished.`
+  );
+
+  quickButtons.onclick = e=>{
+    const b=e.target.closest('button');
+    if(!b) return;
+    addToCurrent(Number(b.dataset.add));
+  };
+
+  btnPlus.onclick = ()=>addToCurrent(1);
+  btnMinus.onclick = ()=>addToCurrent(-1);
+  btnAdd.onclick = addRecord;
+
+  btnResetCount.onclick=()=>{
+    if(confirm('Reset count?')){
+      currentCount=0;
+      currentCountEl.textContent='0';
+    }
+  };
+
+  //btnExport.onclick=exportCSV;
+
+  const btnExportReport = document.getElementById('btnExportReport');
+
+  function exportReportCSV() {
+    if (!records.length) {
+        alert("No records to export");
+        return;
+    }
+
+    const formatTime = (date) => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    // --- 1. Metadata ---
+    const station = stationEl.value || 'N/A';
+    const observer = observerEl.value || 'N/A';
+    const species = speciesEl.value || 'N/A';
+    const sessionDate = segments.length ? segments[0].start.toISOString().slice(0, 10) : 'N/A';
+    const startTime = segments.length ? formatTime(segments[0].start) : 'N/A';
+    const endTime = segments.length ? formatTime(segments[segments.length - 1].end) : 'N/A';
+
+    const rows = [];
+    rows.push(['LOW ISLES PIP SURVEY']);
+    rows.push(['Site:', station]);
+    rows.push(['Date:', sessionDate]);
+    rows.push(['Observer(s):', observer]);
+    rows.push(['Species:', species]);
+    rows.push(['Start Time:', startTime]);
+    rows.push(['End Time:', endTime]);
+    rows.push([]); // blank line
+
+    // --- 2. Segment Totals ---
+    rows.push(['Segment Summary']);
+    const totalHeader = ['Segment Start', 'Segment End', 'Total Count'];
+    rows.push(totalHeader);
+
+    const segmentTotals = segments.map((seg, i) => {
+        const total = records.filter(r => r.segmentIndex === i)
+                             .reduce((sum, r) => sum + r.count, 0);
+        return [
+            formatTime(seg.start),
+            formatTime(seg.end),
+            total
+        ];
+    });
+    rows.push(...segmentTotals);
+
+    const sessionTotal = records.reduce((sum, r) => sum + r.count, 0);
+    rows.push(['', 'Session Total', sessionTotal]);
+
+    rows.push([]); // blank line
+
+
+    // --- 3. Crosstab Data ---
+    rows.push(['Individual Segment Records (Crosstab)']);
+
+    // Create header row with segment labels
+    const crosstabHeader = segments.map(seg =>
+        //`Segment: ${seg.start.toLocaleTimeString()} → ${seg.end.toLocaleTimeString()}`
+        `-->: ${formatTime(seg.end)}`
+    );
+    rows.push(crosstabHeader);
+
+    // Group records by segment
+    const recordsBySegment = segments.map((seg, i) =>
+        records.filter(r => r.segmentIndex === i).map(r => r.count)
+    );
+
+    // Find the max number of rows needed
+    const maxRows = recordsBySegment.reduce((max, segment) => Math.max(max, segment.length), 0);
+
+    // Create the data rows
+    for (let i = 0; i < maxRows; i++) {
+        const row = recordsBySegment.map(segmentRecords => segmentRecords[i] || '');
+        rows.push(row);
+    }
+
+    // --- 4. CSV Generation ---
+    const csvString = rows.map(row =>
+        row.map(field => {
+            let f = String(field);
+            if (f.includes(',') || f.includes('"') || f.includes('\n')) {
+                f = '"' + f.replace(/"/g, '""') + '"';
+            }
+            return f;
+        }).join(',')
+    ).join('\n');
+
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `birdcount_${station}_report_${sessionDate}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  btnExportReport.onclick = exportReportCSV;
+
+  const styleSheet = document.createElement("style")
+  styleSheet.innerText = `
+    .final-seconds {
+      color: red;
+    }
+  `
+  document.head.appendChild(styleSheet)
+
+  segmentSelect.onchange=()=>{
+    if (extraDataMode) {
+      segmentIndex=Number(segmentSelect.value);
+      updateSegmentUI();
+    } else {
+      // Revert selection if not in extra data mode
+      segmentSelect.value = segmentIndex;
+    }
+  };
+
+  btnExtraData.onclick = () => {
+    extraDataMode = true;
+    stopTimer();
+    segmentSelect.disabled = false;
+    segTimer.textContent = "MANUAL";
+    btnExtraData.style.display = 'none'; // hide after clicking
+    alert('Extra data mode enabled. Select a segment and add counts manually.');
+  };
+
+  [observerEl,stationEl,speciesEl,sessionStartEl,sessionLengthEl,segmentLengthEl]
+    .forEach(el=>el.addEventListener('change',saveSettings));
+
+  (function init(){
+    const now=new Date();
+    now.setSeconds(0,0);
+    now.setMinutes(Math.floor(now.getMinutes()/5)*5);
+    sessionStartEl.value=now.toISOString().slice(0,16);
+
+    const rec=localStorage.getItem(recordsKey);
+    if(rec){ try{records=JSON.parse(rec);}catch(e){records=[];} }
+
+    const s=localStorage.getItem(settingsKey);
+    if(s){
+      try{
+        const parsed=JSON.parse(s);
+        if(parsed.segments){
+          segments=parsed.segments.map(x=>({start:new Date(x.start),end:new Date(x.end)}));
+          buildSegmentSelect();
+          checkSessionEnd();
+          beepPlayedForSegment = new Array(segments.length).fill(false);
+        }
+        observerEl.value=parsed.observer||'';
+        stationEl.value=parsed.station||'';
+        speciesEl.value=parsed.species||'';
+        sessionStartEl.value=parsed.sessionStart||sessionStartEl.value;
+        sessionLengthEl.value=parsed.sessionLength||sessionLengthEl.value;
+        segmentLengthEl.value=parsed.segmentLength||segmentLengthEl.value;
+      }catch(e){}
+    }
+
+    renderRecords();
+    updateTotals();
+    checkVersion();
+  })();
+
+})();
+</script>
+</body>
+</html>

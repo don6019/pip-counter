@@ -1,0 +1,126 @@
+{
+  "settings": {
+    "observer": "Don",
+    "station": "B",
+    "species": "PIP",
+    "sessionStart": "2025-11-29T17:24",
+    "sessionLength": 15,
+    "segmentLength": 5,
+    "segments": [
+      {
+        "start": "2025-11-29T06:40:00.000Z",
+        "end": "2025-11-29T06:45:00.000Z"
+      },
+      {
+        "start": "2025-11-29T06:45:00.000Z",
+        "end": "2025-11-29T06:50:00.000Z"
+      },
+      {
+        "start": "2025-11-29T06:50:00.000Z",
+        "end": "2025-11-29T06:55:00.000Z"
+      }
+    ]
+  },
+  "records": [
+    {
+      "id": 1764397421985,
+      "when": "2025-11-29T06:23:41.024Z",
+      "segmentIndex": 2,
+      "segmentLabel": "16:22:00 → 16:27:00",
+      "observer": "",
+      "station": "A",
+      "species": "PIP",
+      "count": 2
+    },
+    {
+      "id": 1764397419043,
+      "when": "2025-11-29T06:23:38.912Z",
+      "segmentIndex": 2,
+      "segmentLabel": "16:22:00 → 16:27:00",
+      "observer": "",
+      "station": "A",
+      "species": "PIP",
+      "count": 9
+    },
+    {
+      "id": 1764396819620,
+      "when": "2025-11-29T06:13:39.240Z",
+      "segmentIndex": 0,
+      "segmentLabel": "16:12:00 → 16:17:00",
+      "observer": "",
+      "station": "A",
+      "species": "PIP",
+      "count": 13
+    },
+    {
+      "id": 1764396754313,
+      "when": "2025-11-29T06:12:33.659Z",
+      "segmentIndex": 0,
+      "segmentLabel": "16:12:00 → 16:17:00",
+      "observer": "",
+      "station": "A",
+      "species": "PIP",
+      "count": 6
+    },
+    {
+      "id": 1764396749767,
+      "when": "2025-11-29T06:12:29.474Z",
+      "segmentIndex": 0,
+      "segmentLabel": "16:12:00 → 16:17:00",
+      "observer": "",
+      "station": "A",
+      "species": "PIP",
+      "count": 3
+    },
+    {
+      "id": 1764396747379,
+      "when": "2025-11-29T06:12:26.432Z",
+      "segmentIndex": 0,
+      "segmentLabel": "16:12:00 → 16:17:00",
+      "observer": "",
+      "station": "A",
+      "species": "PIP",
+      "count": 1
+    },
+    {
+      "id": 1764396745231,
+      "when": "2025-11-29T06:12:24.951Z",
+      "segmentIndex": 0,
+      "segmentLabel": "16:12:00 → 16:17:00",
+      "observer": "",
+      "station": "A",
+      "species": "PIP",
+      "count": 2
+    },
+    {
+      "id": 1764396740926,
+      "when": "2025-11-29T06:12:20.895Z",
+      "segmentIndex": 0,
+      "segmentLabel": "16:12:00 → 16:17:00",
+      "observer": "",
+      "station": "A",
+      "species": "PIP",
+      "count": 6
+    },
+    {
+      "id": 1764396737010,
+      "when": "2025-11-29T06:12:16.500Z",
+      "segmentIndex": 0,
+      "segmentLabel": "16:12:00 → 16:17:00",
+      "observer": "",
+      "station": "A",
+      "species": "PIP",
+      "count": 7
+    },
+    {
+      "id": 1764396729295,
+      "when": "2025-11-29T06:12:08.474Z",
+      "segmentIndex": 0,
+      "segmentLabel": "16:12:00 → 16:17:00",
+      "observer": "",
+      "station": "A",
+      "species": "PIP",
+      "count": 4
+    }
+  ]
+}

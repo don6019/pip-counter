@@ -148,7 +148,7 @@
     <div style="margin-top:10px" class="two">
       <div>
         <label>Session length (minutes)</label>
-        <input id="sessionLength" type="number" value="120" min="15" step="15">
+        <input id="sessionLength" type="number" value="180" min="15" step="15">
       </div>
       <div>
         <label>Segment length (minutes)</label>
@@ -165,7 +165,7 @@
     </div>
 
     <div style="margin-top:8px;color:var(--muted);font-size:13px">
-      Tip: Set session start to the scheduled start. The app will create segments (e.g. 8 × 15 min for 120 min).
+      Tip: Set session start to the scheduled start. The app will create segments (e.g. 12 × 15 min for 180 min).
     </div>
   </div>
 
@@ -815,7 +815,9 @@
 3) Click "Build Segments & Start".
 4) Tap quick buttons or +/− to count.
 5) Tap ADD to save each record.
-6) Export Report when finished.`
+6) Export Report when finished.
+7) After Session finished press Extra Data button
+8) Manually add extra records to a segment`
   );
 
   quickButtons.onclick = e=>{

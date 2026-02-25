@@ -255,7 +255,8 @@
         color: #e9ecef;
       }
 
-      #btnBuild {
+      #btnBuild,
+      #btnExtraData {
         color: #111;
       }
 
@@ -289,7 +290,7 @@
 <body>
   <div class="wrap">
     <header>
-      <h1>PIP Counter — V1.1</h1>
+      <h1>PIP Counter — V1.1.1</h1>
       <div style="font-size:12px;color:var(--muted)">Data stored locally</div>
     </header>
 
@@ -337,7 +338,7 @@
       </div>
 
       <div style="margin-top:8px;color:var(--muted);font-size:13px">
-        Tip: Set session start to the scheduled start. The app will create segments (e.g. 8 × 15 min for 180 min).
+        Tip: Set session start to the scheduled start. The app will create segments (e.g. 12 × 15 min for 180 min).
       </div>
     </div>
 
@@ -386,7 +387,7 @@
           <button class="small" id="btnResetCount">Reset count</button>
 
           <button class="small" id="btnExportReport">Export Report</button>
-          <button class="small" id="btnExtraData" style="display:none; background-color: #f0ead6;">Extra Data</button>
+          <button class="small" id="btnExtraData" style="display:none; background-color: #d4edda;">Extra Data</button>
         </div>
 
 
@@ -463,6 +464,7 @@
       let recordsKey = 'bc_records_v1';
       let extraDataMode = false;
       let beepPlayedForSegment = [];
+      let preSessionBeepsPlayed = 0;
       let audioCtx;
 
       function saveSettings() {
@@ -537,11 +539,19 @@
         if (!settings && !recordsData) { return; }
 
         const backupData = { settings: settings ? JSON.parse(settings) : {}, records: recordsData ? JSON.parse(recordsData) : [] };
-        const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+        const jsonString = JSON.stringify(backupData, null, 2);
+        const fileName = `birdcount_backup_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.json`;
+
+        if (window.Android && window.Android.saveFile) {
+          window.Android.saveFile(jsonString, fileName);
+          return;
+        }
+
+        const blob = new Blob([jsonString], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `birdcount_backup_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.json`;
+        a.download = fileName;
         a.click();
         URL.revokeObjectURL(url);
       }
@@ -641,9 +651,9 @@
             // Pre-session beeps for the last 5 seconds
             if (msToStart > 0 && msToStart <= 5200) {
               const secondsToStart = Math.ceil(msToStart / 1000);
-              if (secondsToStart > 0 && secondsToStart <= 5 && beepPlayedForSegment[0] < (6 - secondsToStart)) {
+              if (secondsToStart > 0 && secondsToStart <= 5 && preSessionBeepsPlayed < (6 - secondsToStart)) {
                 playBeep(0.2);
-                beepPlayedForSegment[0]++;
+                preSessionBeepsPlayed++;
               }
             }
           } else { // In-session timer
@@ -699,6 +709,9 @@
 
       function playBeep(duration = 0.2) {
         if (!audioCtx) { return; }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
         const oscillator = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
 
@@ -763,6 +776,15 @@
         const seg = segments[selectedSegmentIndex];
 
         const now = new Date();
+
+        if (!extraDataMode) {
+          const lastSeg = segments[segments.length - 1];
+          if (lastSeg && now > lastSeg.end) {
+            alert("Session has ended. Use 'Extra Data' button to add records manually.");
+            return;
+          }
+        }
+
         if (!extraDataMode && now < seg.start) {
           alert("You can't add a count until the segment has started.");
           return;
@@ -876,12 +898,19 @@
             .map(x => String(x).replace(/,/g, ' '))
             .join(',')
         );
-        const csv = [header.join(',')].concat(rows).join('\n');
-        const blob = new Blob([csv], { type: 'text/csv' });
+        const csvString = [header.join(',')].concat(rows).join('\n');
+        const fileName = 'birdcounts.csv';
+
+        if (window.Android && window.Android.saveFile) {
+          window.Android.saveFile(csvString, fileName);
+          return;
+        }
+
+        const blob = new Blob([csvString], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'birdcounts.csv';
+        a.download = fileName;
         a.click();
         URL.revokeObjectURL(url);
       }
@@ -975,7 +1004,12 @@
         saveSettings();
       };
 
-      btnResume.onclick = loadSaved;
+      btnResume.onclick = () => {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        loadSaved();
+      };
 
       btnRestore.onclick = () => {
         restoreInput.click();
@@ -995,7 +1029,9 @@
 3) Click "Build Segments & Start".
 4) Tap quick buttons or +/− to count.
 5) Tap ADD to save each record.
-6) Export Report when finished.`
+6) Export Report when finished.
+7) After Session finished press Extra Data button
+8) Manually add extra records to a segment`
       );
 
       quickButtons.onclick = e => {
@@ -1025,11 +1061,19 @@
           return;
         }
 
+        const stationRaw = stationEl.value.trim();
+        const observerRaw = observerEl.value.trim();
+
+        if (!stationRaw || !observerRaw) {
+          alert("Please enter both Observer and Station details before exporting.");
+          return;
+        }
+
         const formatTime = (date) => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         // --- 1. Metadata ---
-        const station = stationEl.value || 'N/A';
-        const observer = observerEl.value || 'N/A';
+        const station = stationRaw || 'UnknownStation';
+        const observer = observerRaw || 'UnknownObserver';
         const species = speciesEl.value || 'N/A';
         const sessionDate = segments.length ? segments[0].start.toISOString().slice(0, 10) : 'N/A';
         const startTime = segments.length ? formatTime(segments[0].start) : 'N/A';
@@ -1102,11 +1146,20 @@
           }).join(',')
         ).join('\n');
 
+        // Sanitize station for filename
+        const safeStation = station.replace(/[^a-z0-9]/gi, '_').replace(/_{2,}/g, '_');
+        const fileName = `birdcount_${safeStation}_report_${sessionDate}.csv`;
+
+        if (window.Android && window.Android.saveFile) {
+          window.Android.saveFile(csvString, fileName);
+          return;
+        }
+
         const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `birdcount_${station}_report_${sessionDate}.csv`;
+        a.download = fileName;
         a.click();
         URL.revokeObjectURL(url);
       }

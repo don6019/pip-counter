@@ -1,7 +1,7 @@
 {
   "name": "PIP Counter",
   "short_name": "PIPCounter",
-  "start_url": "index.html",
+  "start_url": "/pip-counter/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
